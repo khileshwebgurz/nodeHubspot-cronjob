@@ -1,12 +1,11 @@
-const express = require("express");
+
 const axios = require("axios");
-const cron = require("node-cron");
+
 const dotenv = require("dotenv");
 
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+
 
 let longLivedToken = process.env.FB_LONG_LIVED_USER_TOKEN;
 
@@ -25,20 +24,13 @@ async function refreshToken() {
     );
     longLivedToken = res.data.access_token;
     console.log("Token refreshed:", longLivedToken);
+    return longLivedToken;
   } catch (err) {
     console.error("Error refreshing token:", err.response?.data || err.message);
   }
 }
 
-cron.schedule("* * * * *", () => {
-  console.log("Running scheduled token refresh...");
-  refreshToken();
-});
-
-app.get("/get-token", (req, res) => {
-  res.json({ access_token: longLivedToken });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = async (req, res) => {
+  const token = await refreshToken();
+  res.json({ access_token: token });
+};
