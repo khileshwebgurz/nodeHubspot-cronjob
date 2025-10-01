@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const cron = require("node-cron");
 const dotenv = require("dotenv");
+const cors = require("cors");
 
 dotenv.config();
 
@@ -9,6 +10,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 let longLivedToken = process.env.FB_LONG_LIVED_USER_TOKEN;
+
+app.use(
+  cors({
+    origin: "https://www-tpisolutionsink-com.sandbox.hs-sites.com",
+  })
+);
 
 async function refreshToken() {
   try {
@@ -29,7 +36,6 @@ async function refreshToken() {
     console.error("Error refreshing token:", err.response?.data || err.message);
   }
 }
-
 
 cron.schedule("* * * * *", () => {
   refreshToken();
