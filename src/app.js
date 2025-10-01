@@ -37,8 +37,21 @@ async function refreshToken() {
   }
 }
 
-cron.schedule("* * * * *", () => {
-  refreshToken();
+let lastRefreshDate = new Date();
+
+cron.schedule("0 0 * * *", () => {
+  const today = new Date();
+  const diffDays = Math.floor(
+    (today - lastRefreshDate) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays >= 30) {
+    console.log("Running scheduled token refresh...");
+    refreshToken();
+    lastRefreshDate = today; // reset last refresh
+  } else {
+    console.log(`No refresh today. Days since last refresh: ${diffDays}`);
+  }
 });
 
 app.get("/get-token", (req, res) => {
